@@ -2,7 +2,9 @@ import { gameDb } from '../../../db/game';
 export const dynamic = 'force-dynamic';
 type Player={id:string,name:string,wins:number};
 type Room={code:string,host:string,players:Player[],phase:string,round:number,go:number,taps:Record<string,number>,winner:string|null,result:string};
-function json(data:any,status=200){return Response.json(data,{status,headers:{'Cache-Control':'no-store'}})}
+const cors={'Access-Control-Allow-Origin':'https://masi196.github.io','Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type','Access-Control-Max-Age':'86400'};
+export async function OPTIONS(){return new Response(null,{status:204,headers:cors});}
+function json(data:any,status=200){return Response.json(data,{status,headers:{'Cache-Control':'no-store',...cors}})}
 function view(r:Room){const {go,...safe}=r;return {...safe,phase:r.phase==='playing'?(Date.now()>=go?'green':'red'):r.phase,serverTime:Date.now()};}
 function settle(r:Room){if(r.phase!=='playing')return;const now=Date.now();if(Object.keys(r.taps).length<r.players.length&&now<r.go+6500)return;
 const valid=r.players.filter(p=>r.taps[p.id]>=0).sort((a,b)=>r.taps[a.id]-r.taps[b.id]);
